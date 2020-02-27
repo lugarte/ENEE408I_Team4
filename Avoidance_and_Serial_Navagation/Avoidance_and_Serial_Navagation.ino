@@ -4,13 +4,13 @@
 
 /* CURRENT STATUS: 
       This code is being tested, it makes the robot navagate around obstacles.
-      For debugging purposes, it currently halts instead of going left if no serial commands or obstacles are detected.
+      It currently works with serial commands entered from the serial monitor on a laptop but hasn't been tested with other serial command inputs yet.
 
       If the robot sees an obstacle, it avoids it.  If there is no obstacle, it follows serial commands sent to it.
       If there are no obstacles or serial commands, the robot slowly turns left to look for objects.
 
       Logic of obstacle avoidance:
-      If it sees an obstacle in front of it, it goes back for 2 seconds then turns left for 2 seconds.
+      If it sees an obstacle in front of it, it goes back for 2 seconds then turns left for 1 second.
       If it sees an obstacle on the right, it turns left until it doesn't see the obstacle.
       If it sees an obstacle on the left, it turns right until it doesn't see the obstacle.
      
@@ -89,6 +89,23 @@ void setup() {
 void loop() {
 // The code below is old code used to have the robot free roam around the room while avoiding anything
 // that falls into its path
+        char incomingCharacter;
+        bool serialCommandAvailable;
+
+        Serial.println("(1/6) starting loop");
+
+
+        if(Serial.available() > 1) {//read incoming character
+                while(Serial.available() > 1){//make sure if buffer is finished so we follow most recent command
+                incomingCharacter = Serial.read();
+                serialCommandAvailable = true;
+                Serial.println("(2/6) Read something from serial - in while loop");
+                }
+        }
+        else{
+               serialCommandAvailable = false;
+               Serial.println("(2/6) No Serial Commands");
+        }
 
         // Check where the danger is...
         updatePingReadings();
@@ -108,31 +125,31 @@ void loop() {
             currDir = left;
             respondToCurrDir();            
         }
-        else { // No obstacle - check for Serial commands
-              Serial.println("(1/5) no obstacle- Serial commands!");
-
-               if(Serial.available() > 0) {
-                  char incomingCharacter = Serial.read();
+        else if (serialCommandAvailable == true) { // No obstacle - check for Serial commands
+              Serial.println("(3/6) no obstacle- Serial commands!");
                   switch(incomingCharacter) {
                     case '\n': // Disregard newlines
                       break;
                     case 'f':
-                    Serial.println("(2/5) Serial commands:f, changing direction to foward");
+                    Serial.println("(4/6) Serial commands:f, changing direction to foward");
                       prevDir = currDir; 
                       currDir = forward;
                       respondToCurrDir(); 
                       break;
                     case 'l':
+                      Serial.println("(4/6) Serial commands:l, changing direction to left");
                       prevDir = currDir; 
                       currDir = left;
                       respondToCurrDir(); 
                       break;
                     case 'r':
+                      Serial.println("(4/6) Serial commands:r, changing direction to right");
                       prevDir = currDir;  
                       currDir = right;
                       respondToCurrDir(); 
                       break;
                     case 'b': 
+                      Serial.println("(4/6) Serial commands:b, changing direction to back");
                       prevDir = currDir; 
                       currDir = backward;
                       respondToCurrDir(); 
@@ -145,18 +162,18 @@ void loop() {
                     default: 
                       Serial.println("ERROR: Bad Message from Serial - character was not expected"); 
                       break;                                         
-                }
                }
+        }
         else { //No issues or Serial commands - go left slowly
             Serial.println("no issue- and no serial commands...\n\n");
 
             prevDir = currDir;
-            //currDir = leftSlow;
-            currDir = halt;
+            currDir = leftSlow;
+            //currDir = halt;
             respondToCurrDir();
         }
     }
-}
+
 
 void respondToCurrDir() {  
  
@@ -165,9 +182,9 @@ void respondToCurrDir() {
   }
   
   if (currDir != prevDir) {//only send instructions to change motor speed if the direction has changed
-     Serial.println("(3/5) The current direction != last direction");
+     Serial.println("(4/6) The current direction != last direction");
     if (currDir == forward){
-           Serial.println("(4/5) Calling go_foward");
+           Serial.println("(5/6) Calling go_foward");
       go_forward();
     }
     else if (currDir == left)
@@ -193,11 +210,13 @@ void go_stop() {
   md.setM1Speed(0);
   md.setM2Speed(0);
   Serial.println("Stopping\n\n");
+  delay(5000);
+
 
 }
 
 void go_forward() {
-   Serial.println("(5/5) In go_foward");
+   Serial.println("(6/6) In go_foward");
 
   md.setM1Speed(rightSpeedPos);
   md.setM2Speed(leftSpeedPos);
