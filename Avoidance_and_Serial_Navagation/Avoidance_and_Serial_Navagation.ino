@@ -6,8 +6,9 @@
       This code is being tested, it makes the robot navagate around obstacles.
       It currently works with serial commands entered from the serial monitor on a laptop but hasn't been tested with other serial command inputs yet.
 
+
       If the robot sees an obstacle, it avoids it.  If there is no obstacle, it follows serial commands sent to it.
-      If there are no obstacles or serial commands, the robot slowly turns left to look for objects.
+      If there are no obstacles or serial commands, the robot slowly turns left to look for objects. 
 
       Logic of obstacle avoidance:
       If it sees an obstacle in front of it, it goes back for 2 seconds then turns left for 1 second.
@@ -25,7 +26,7 @@ const int STOP_DISTANCE_CENTER = 15; // cm
 const int STOP_DISTANCE_SIDE   = 10; // cm
 
 // enum for Direction
-enum Directions {forward, backward, left, right, halt, leftSlow};
+enum Directions {forward, backward, left, right, halt, leftSlow, backwardDelay, leftDelay};
   // 0 - forward, 1 - backwards, 2 - left, 3 - right, 4 - halt
 
 //globals for motor control
@@ -95,8 +96,8 @@ void loop() {
         Serial.println("(1/6) starting loop");
 
 
-        if(Serial.available() > 1) {//read incoming character
-                while(Serial.available() > 1){//make sure if buffer is finished so we follow most recent command
+        if(Serial.available() > 0) {//read incoming character
+                while(Serial.available() > 0){//make sure if buffer is finished so we follow most recent command
                 incomingCharacter = Serial.read();
                 serialCommandAvailable = true;
                 Serial.println("(2/6) Read something from serial - in while loop");
@@ -112,7 +113,7 @@ void loop() {
         
         if (centerDistance <= STOP_DISTANCE_CENTER) { // If Danger at center...
           prevDir = currDir;
-          currDir = backward;
+          currDir = backwardDelay;
           respondToCurrDir();
         }
         else if (leftDistance <= STOP_DISTANCE_SIDE) { // Issue @ left, so go right
@@ -177,7 +178,7 @@ void loop() {
 
 void respondToCurrDir() {  
  
-  if(prevDir == backward){//if last direction was go back, then go left
+  if(prevDir == backwardDelay){//if last direction was go back, then go left
     currDir = left;
   }
   
@@ -189,11 +190,14 @@ void respondToCurrDir() {
     }
     else if (currDir == left)
       go_left();
+    else if (currDir == leftDelay)
+      go_left_delay();
     else if (currDir == right)
       go_right();
-    else if (currDir == backward){
+    else if (currDir == backwardDelay)
+      go_backward_delay();
+    else if (currDir == backward)
       go_backward();
-    }
     else if (currDir == halt)
       go_stop();
     else if (currDir == leftSlow)
@@ -210,7 +214,7 @@ void go_stop() {
   md.setM1Speed(0);
   md.setM2Speed(0);
   Serial.println("Stopping\n\n");
-  delay(5000);
+  //delay(5000);
 
 
 }
@@ -223,21 +227,30 @@ void go_forward() {
   Serial.println("Going Foward \n\n");
 }
 
+void go_backward_delay() {
+  md.setM1Speed(rightSpeedNeg);
+  md.setM2Speed(leftSpeedNeg); 
+  Serial.println("Going Back...\n\n");
+  delay(2000);
+}
+
 void go_backward() {
   md.setM1Speed(rightSpeedNeg);
   md.setM2Speed(leftSpeedNeg); 
   Serial.println("Going Back\n\n");
-  delay(2000);
 }
 
 void go_left() {
   md.setM1Speed(rightSpeedPos);
   md.setM2Speed(leftSpeedNeg);
   Serial.println("Going Left\n\n");
-  if(prevDir == backward){
-    delay(1000);
-  }
+}
 
+void go_left_delay() {
+  md.setM1Speed(rightSpeedPos);
+  md.setM2Speed(leftSpeedNeg);
+  Serial.println("Going Left...\n\n");
+  delay(2000);
 }
 
 void go_left_slow() {
@@ -272,8 +285,8 @@ void updatePingCenter(){
   duration = pulseIn(pingPinFront, HIGH);
   centerDistance = microsecondsToCentimeters(duration);
 
-  Serial.print("Front sensor = ");
-  Serial.println(centerDistance);
+  //Serial.print("Front sensor = ");
+  //Serial.println(centerDistance);
  
 }
 
@@ -289,8 +302,8 @@ void updatePingLeft(){
   duration = pulseIn(pingPinLeft, HIGH);
   leftDistance = microsecondsToCentimeters(duration);
 
-  Serial.print("Left sensor = ");
-  Serial.println(leftDistance);
+  //Serial.print("Left sensor = ");
+  //Serial.println(leftDistance);
 }
 
 void updatePingRight(){
@@ -305,8 +318,8 @@ void updatePingRight(){
   duration = pulseIn(pingPinRight, HIGH);
   rightDistance = microsecondsToCentimeters(duration);
 
-  Serial.print("Right sensor = ");
-  Serial.println(rightDistance);
+  //Serial.print("Right sensor = ");
+  //Serial.println(rightDistance);
 
 }
 
