@@ -24,7 +24,6 @@ ser = serial.Serial(
 		bytesize=serial.SEVENBITS
 		)
 
-#ser.open()
 ser.isOpen()
 
 print( 'Enter your commands below.\r\nInsert "exit" to leave the application.')
@@ -32,14 +31,11 @@ print( 'Enter your commands below.\r\nInsert "exit" to leave the application.')
 input_read=1
 while 1 :
 # get keyboard input
-# input = raw_input(">> ")
-# Python 3 users
 	input_read = input(">> ")
 	if input_read == 'exit':
 		ser.close()
 		exit()
 	else:
 	# send the character to the device
-	# (note that I happend a \r\n carriage return and line feed to the characters - this is requested by my device)
 		arr = bytearray(input_read, 'utf-8')
 		ser.write(arr)
