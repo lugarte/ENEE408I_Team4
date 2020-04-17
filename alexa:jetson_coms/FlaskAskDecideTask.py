@@ -39,5 +39,5 @@ def enforce_quarantine():
 	return statement(speech_text).simple_card('Mary', speech_text)
 
 if __name__ == '__main__':
-	ser = serial.Serial('/path/', 9600)
+	ser = serial.Serial('/dev/cu.usbmodem1411', 9600)
 	app.run()
