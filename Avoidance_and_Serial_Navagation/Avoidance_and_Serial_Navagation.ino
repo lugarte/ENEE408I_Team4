@@ -3,9 +3,8 @@
 // Code for robot to navagate while avoiding obstacles 
 
 /* CURRENT STATUS: 
-      This code is being tested, it makes the robot navagate around obstacles.
-      It currently works with serial commands entered from the serial monitor on a laptop but hasn't been tested with other serial command inputs yet.
-
+      This code makes the robot navagate around obstacles.
+      It currently has been sucessfully tested with serial commands entered from the serial monitor on a laptop, but hasn't been tested with serial commands from other sources.
 
       If the robot sees an obstacle, it avoids it.  If there is no obstacle, it follows serial commands sent to it.
       If there are no obstacles or serial commands, the robot slowly turns left to look for objects. 
