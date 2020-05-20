@@ -87,8 +87,7 @@ void setup() {
 }
 
 void loop() {
-// The code below is old code used to have the robot free roam around the room while avoiding anything
-// that falls into its path
+
         char incomingCharacter;
         bool serialCommandAvailable;
 
